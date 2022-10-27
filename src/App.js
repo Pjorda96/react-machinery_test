@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+// import React, { Component } from 'react';
 import { StateMachine } from 'react-machinery';
+import { Provider, connect } from 'react-redux';
 
 /*
   This example uses a regular react component as the data store for our state machine.
@@ -18,6 +19,7 @@ const Two = () => <div>State #2</div>
 const Ten = () => <div>State #10</div>
 const HitchHikerComponent = () => <div>Theres a frood who really knows where his towel is.</div>
 
+// Common setup
 const states = [
   {
     name: 'theNumberOne',
@@ -63,28 +65,73 @@ const states = [
   },
 ];
 
-export default class App extends Component {
-  state = {
-    n: 1,
-    stateName: 'theNumberOne'
-  };
+// Redux setup
+const store = {};
 
-  render() {
-    const { n, stateName } = this.state;
-    return <div>
+// React setup
+// class App extends Component {
+//   state = {
+//     n: 1,
+//     stateName: 'theNumberOne'
+//   };
+  
+//   render() {
+//     const { n, stateName } = this.state;
+//     return (
+//       <div>
+//         <StateMachine
+//           getCurrentState={() => stateName}
+//           setNewState={stateName => this.setState(() => ({ stateName }))}
+//           data={{n}}
+//           states={states}
+//         />
+
+//         <div>{n}</div>
+
+//         <button onClick={() => this.setState(() => ({n: n + 1}))}>+1</button>
+//         <button onClick={() => this.setState(() => ({n: n + 10}))}>+10</button>
+//         <button onClick={() => this.setState(() => ({n: n - 1}))}>-1</button>
+//         <button onClick={() => this.setState(() => ({n: n - 10}))}>-10</button>
+//       </div>
+//     );
+//   }
+// }
+
+
+// Redux setup
+const App = connect(
+  state => ({
+    n: state.n,
+    currentState: state.currentState
+  }),
+  dispatch => ({
+    setNewState: (stateName) => dispatch({
+      type: 'SET_NEW_STATE',
+      payload: stateName
+    }),
+    updateN: (newValue) => dispatch({
+      type: 'UPDATE_N_VALUE',
+      payload: newValue
+    })
+  })
+)(({n, currentState, setNewState, updateN}) => {
+  return (
+    <Provider store={store}>
       <StateMachine
-        getCurrentState={() => stateName}
-        setNewState={stateName => this.setState(() => ({ stateName }))}
+        getCurrentState={() => currentState}
+        setNewState={setNewState}
         data={{n}}
         states={states}
       />
 
       <div>{n}</div>
 
-      <button onClick={() => this.setState(() => ({n: n + 1}))}>+1</button>
-      <button onClick={() => this.setState(() => ({n: n + 10}))}>+10</button>
-      <button onClick={() => this.setState(() => ({n: n - 1}))}>-1</button>
-      <button onClick={() => this.setState(() => ({n: n - 10}))}>-10</button>
-    </div>;
-  }
-}
+      <button onClick={() => updateN(n + 1)}>+1</button>
+      <button onClick={() => updateN(n + 10)}>+10</button>
+      <button onClick={() => updateN(n - 1)}>-1</button>
+      <button onClick={() => updateN(n - 10)}>-10</button>
+    </Provider>
+  );
+})
+
+export default App;
